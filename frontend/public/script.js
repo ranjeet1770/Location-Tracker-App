@@ -6,7 +6,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: "OpenStreetMap"
 }).addTo(map)
 
-let marker
+const markers = {}
 
 if (navigator.geolocation) {
 
@@ -14,19 +14,37 @@ if (navigator.geolocation) {
 
     const { latitude, longitude } = position.coords
 
-    console.log(latitude, longitude)
-
     socket.emit("send-location", { latitude, longitude })
-
-    if(marker){
-      marker.setLatLng([latitude, longitude])
-    }
-    else{
-      marker = L.marker([latitude, longitude]).addTo(map)
-    }
-
-    map.setView([latitude, longitude], 15)
 
   })
 
 }
+
+socket.on("receive-location", (data) => {
+
+  const { id, latitude, longitude } = data
+
+  if(markers[id]){
+
+    markers[id].setLatLng([latitude, longitude])
+
+  } else {
+
+    markers[id] = L.marker([latitude, longitude]).addTo(map)
+
+  }
+
+  map.setView([latitude, longitude], 15)
+
+})
+
+socket.on("user-disconnected", (id) => {
+
+  if(markers[id]){
+
+    map.removeLayer(markers[id])
+    delete markers[id]
+
+  }
+
+})
