@@ -16,21 +16,26 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
 
-  console.log("User connected:", socket.id);
+  console.log("User connected:", socket.id)
 
   socket.on("send-location", (data) => {
 
-    console.log("Location received:", data);
+    io.emit("receive-location", {
+      id: socket.id,
+      ...data
+    })
 
-    io.emit("receive-location", data);
-
-  });
+  })
 
   socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
 
-});
+    console.log("User disconnected:", socket.id)
+
+    io.emit("user-disconnected", socket.id)
+
+  })
+
+})
 
 server.listen(5000, () => {
   console.log("Server running on port 5000");
