@@ -1,3 +1,5 @@
+const username = prompt("Enter your name:")
+
 const socket = io("http://localhost:5000")
 
 let map = L.map('map').setView([0,0], 2)
@@ -14,7 +16,11 @@ if (navigator.geolocation) {
 
     const { latitude, longitude } = position.coords
 
-    socket.emit("send-location", { latitude, longitude })
+    socket.emit("send-location", {
+      latitude,
+      longitude,
+      username
+    })
 
   })
 
@@ -22,7 +28,7 @@ if (navigator.geolocation) {
 
 socket.on("receive-location", (data) => {
 
-  const { id, latitude, longitude } = data
+  const { id, latitude, longitude, username } = data
 
   if(markers[id]){
 
@@ -30,7 +36,9 @@ socket.on("receive-location", (data) => {
 
   } else {
 
-    markers[id] = L.marker([latitude, longitude]).addTo(map)
+    markers[id] = L.marker([latitude, longitude])
+      .addTo(map)
+      .bindPopup(username)
 
   }
 
